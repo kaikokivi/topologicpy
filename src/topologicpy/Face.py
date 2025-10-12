@@ -1884,23 +1884,24 @@ class Face():
             The created vertex.
 
         """
-        from topologicpy.Vertex import Vertex
-        from topologicpy.Shell import Shell
-        from topologicpy.Cluster import Cluster
-        from topologicpy.BVH import BVH
         from topologicpy.Topology import Topology
+        from topologicpy.Vertex import Vertex
+        from topologicpy.Vector import Vector
+        from topologicpy.Edge import Edge
+        from topologicpy.Cluster import Cluster
 
-        centroid = Topology.Centroid(face)
-        if Vertex.IsInternal(centroid, face):
-            return centroid
-
-        shell = Topology.Triangulate(face)
-        ib = Shell.InternalBoundaries(shell)
-        cluster = Cluster.ByTopologies(ib)
-        edges = Topology.Edges(cluster)
-        bvh = BVH.ByTopologies(edges, tolerance=tolerance, silent=True)
-        nearest_edge = BVH.Nearest(bvh, centroid)
-        return Topology.Centroid(nearest_edge)
+        if not Topology.IsInstance(face, "Face"):
+            return None
+        
+        v = Topology.Centroid(face)
+        
+        if Vertex.IsInternal(v, face):
+            return v
+        
+        #print("centroid is not internal")
+        V = Cluster.ByTopologies([Topology.Centroid(f) for f in Face.Triangulate(face)])
+        na = Vertex.NearestVertex(v, V)
+        return na
 
 
     @staticmethod
